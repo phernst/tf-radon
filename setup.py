@@ -28,6 +28,17 @@ class CMakeBuild(build_ext):
             if cmake_version < '3.1.0':
                 raise RuntimeError("CMake >= 3.1.0 is required on Windows")
 
+        import tensorflow as tf
+        tf_lib_dir = tf.sysconfig.get_lib()
+        tf_file = 'libtensorflow_framework.so'
+        if not os.path.exists(os.path.join(tf_lib_dir, tf_file)):
+            tf_cur_file = [f for f in os.listdir(tf_lib_dir) if f.startswith(tf_file)][0]
+            print(f"Creating symlink {tf_file} -> {tf_cur_file}")
+            os.symlink(
+                os.path.join(tf_lib_dir, tf_cur_file),
+                os.path.join(tf_lib_dir, tf_file),
+            )
+
         for ext in self.extensions:
             self.build_extension(ext)
 
